@@ -4,7 +4,8 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const func=require('./functions');
+// const func=require('./functions');
+const {success, error} = require('./functions');
 
 // middleware
 app.use(morgan('dev'));
@@ -29,20 +30,24 @@ const students = [{
     }
 ];
 
-// http://localhost:8080/api/V1/students/1
-app.get('/api/v1/students/:id', (req, res) => {
-    const id = req.params.id;
-    res.json(func.success(students[id - 1]));
-});
-
 // http://localhost:8080/api/V1/students?max=2
 app.get('/api/v1/students', (req, res) => {
     if (req.query.max != undefined && req.query.max > 0)
-        res.json(func.success(students.slice(0, req.query.max)));
+        res.json(success(students.slice(0, req.query.max)));
     else if(req.query.max != undefined)
-        res.json(func.error('Wrong max value'));
+        res.json(error('Wrong max value'));
     else
-        res.json(func.success(students));
+        res.json(success(students));
+});
+
+// http://localhost:8080/api/V1/students/1
+app.get('/api/v1/students/:id', (req, res) => {
+    const index = getIndex(req.params.id);
+
+    if (typeof (index) == 'string')
+        res.json(error(index));
+    else
+        res.json(success(students[index]));
 });
 
 // use Postman with parameter: x-www-form-urlencoded
@@ -54,24 +59,69 @@ app.post('/api/v1/students', (req, res) => {
     // res.send(req.body);
     if (req.body.name) {
         let isAlreadyExist = false;
+
+        // for (let i = 0; i < students.length; i++) {
+        //     if (students[i].name == req.body.name) {
+        //         isAlreadyExist = true;
+        //         break;
+        //     }
+        // }
+        
         // Name already Exist?
-        for (let i = 0; i < students.length; i++) {
-            if (students[i].name == req.body.name) {
-                isAlreadyExist = true;
-                break;
-            }
-        }
+        if(students.find(element => element.name == req.body.name))
+            isAlreadyExist = true;
+
         if (!isAlreadyExist) {
+            // Add a new object in the array
             const student = {
-                id: students.length + 1,
+                id: createID(),
                 name: req.body.name
             };
             students.push(student);
-            res.json(func.success(student));
+            res.json(success(student));
         } else
-            res.json(func.error('Name already Exist'))
+            res.json(error('Name already Exist'));
     } else
-        res.json(func.error('Key not found'));
+        res.json(error('Key not found'));
+});
+
+// use Postman with parameter: x-www-form-urlencoded
+// http://localhost:8080/api/V1/students/1
+// exemple:
+// key = name
+// value = Alexendra
+app.put('/api/v1/students/:id', (req, res) => {
+    const index = getIndex(req.params.id);
+
+    if (typeof (index) == 'string') {
+        res.json(error(index));
+    } else {
+        students[index].name = req.body.name;
+        res.json(success(students[index]));
+    }
+});
+
+app.delete('/api/v1/students/:id', (req, res) => {
+    const index = getIndex(req.params.id);
+
+    if (typeof (index) == 'string') {
+        res.json(error(index));
+    } else {
+        students.splice(index,1);
+        res.json(success(students));
+    }
 });
 
 app.listen(8080, () => console.log('Start on 8080'));
+
+const getIndex = (id) => {
+    for (let index = 0; index < students.length; index++) {
+        if (students[index].id == id)
+            return index;
+    }
+    return "Wrong id";
+};
+
+const createID = ()=>{
+    return students[students.length - 1].id + 1;
+};
