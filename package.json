@@ -5,15 +5,13 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js"
+    "start": "node app.js"
   },
   "author": "DHUV",
   "license": "ISC",
   "dependencies": {
-	"nodemon": "^1.18.4"
   },
   "devDependencies": {
-    "morgan": "^1.9.1",
-    "nodemon": "^1.18.4"
+    "morgan": "^1.9.1"
   }
 }
