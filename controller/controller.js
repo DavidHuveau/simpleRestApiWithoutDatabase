@@ -1,12 +1,8 @@
 require('babel-register');
 
 const express = require('express');
-const app = express();
-const studentsRouter = express.Router();
-// const func=require('./functions');
 const {success, error} = require('./functions');
-
-// app.use('/api/v1/students', studentsRouter)
+const studentsRouter = express.Router();
 
 const students = [{
         id: 1,
@@ -31,40 +27,29 @@ const students = [{
 // exemple:
 // key = name
 // value = Alexendra
-studentsRouter.route('/:id')
+studentsRouter.route('/:id(\\d+)')
 
     // get a student from an id
     .get((req, res) => {
         const index = getIndex(req.params.id);
 
-        if (typeof (index) == 'string')
-            res.json(error(index));
-        else
-            res.json(success(students[index]));
+        res.json(success(students[index]));
     })
 
     // update a student from an id
     .put((req, res) => {
         const index = getIndex(req.params.id);
 
-        if (typeof (index) == 'string') {
-            res.json(error(index));
-        } else {
-            students[index].name = req.body.name;
-            res.json(success(students[index]));
-        }
+        students[index].name = req.body.name;
+        res.json(success(students[index]));
     })
     
     // delete a student from an id
     .delete((req, res) => {
         const index = getIndex(req.params.id);
 
-        if (typeof (index) == 'string') {
-            res.json(error(index));
-        } else {
-            students.splice(index,1);
-            res.json(success(students));
-        }
+        students.splice(index,1);
+        res.json(success(students));
     });
 
 
@@ -88,7 +73,6 @@ studentsRouter.route('/')
 
     // Insert a student
     .post((req, res) => {
-        // res.send(req.body);
         if (req.body.name) {
             let isAlreadyExist = false;
             
