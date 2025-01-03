@@ -1,5 +1,3 @@
-require('babel-register');
-
 const express = require('express');
 const {success, error} = require('./functions');
 const studentsRouter = express.Router();

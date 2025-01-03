@@ -1,4 +1,5 @@
-require('babel-register');
+require('@babel/register')();
+
 
 const express = require('express');
 const app = express();
